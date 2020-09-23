@@ -16,8 +16,8 @@ class TestViews(TestCase):
             "password": "test_user_1",
         }
         expected_response = {
-            "response": "New user registered.",
             "email": "testuser1@email.com",
+            "password": "test_user_1"
         }
         response = self.client.post(self.register_url, posting_object)
         self.assertEqual(response.data, expected_response)
@@ -27,7 +27,6 @@ class TestViews(TestCase):
 
     def test_registration_POST_add_new_user_fail(self):
         posting_object = {}
-        expected_response = "User registration failed."
 
         response = self.client.post(self.register_url, posting_object)
-        self.assertEqual(response.data.get("response"), expected_response)
+        self.assertEqual(response.data.get("response"), None)
