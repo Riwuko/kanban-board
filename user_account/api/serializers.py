@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from user_account.models.user import UserAccount
+from user_account.models.user_account import UserAccount
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class UserAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ["email", "password"]
