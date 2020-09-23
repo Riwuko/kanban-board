@@ -11,14 +11,12 @@ from user_account.api.serializers import RegistrationSerializer
     ]
 )
 def registration_view(request):
-    print(request.data)
     serializer = RegistrationSerializer(data=request.data)
     data = {}
     if serializer.is_valid():
         user = serializer.save()
         data["response"] = "New user registered."
         data["email"] = user.email
-        data["username"] = user.username
     else:
         data["response"] = "User registration failed."
         data["errors"] = serializer.errors
