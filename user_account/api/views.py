@@ -1,21 +1,25 @@
+import jwt
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import exceptions, generics, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from user_account.api.serializers import RegistrationSerializer
-from user_account.api.utils import generate_access_token, generate_refresh_token
-from user_account.models.user import UserAccount
+from rest_framework_jwt.serializers import jwt_payload_handler
+from user_account.api.serializers import UserAccountSerializer
+from user_account.models.user_account import UserAccount
 
 
 class UserCreateView(generics.CreateAPIView):
-    serializer_class = RegistrationSerializer
+    serializer_class = UserAccountSerializer
     queryset = UserAccount.objects.all()
     permission_classes = [AllowAny]
 
 
 class UserLoginView(generics.CreateAPIView):
-    serializer_class = RegistrationSerializer
+    serializer_class = UserAccountSerializer
     queryset = UserAccount.objects.all()
     permission_classes = [AllowAny]
 
@@ -30,15 +34,11 @@ class UserLoginView(generics.CreateAPIView):
         if (user is None) or (not user.check_password(password)):
             raise exceptions.AuthenticationFailed("Wrong email or password")
 
-        serialized_user = self.serializer_class(user).data
+        payload = jwt_payload_handler(user)
+        token = jwt.encode(payload, settings.SECRET_KEY)
+        user_details = {}
+        user_details["email"] = user.email
+        user_details["token"] = token
+        return Response(user_details, status=status.HTTP_200_OK)
 
-        access_token = generate_access_token(user)
-        refresh_token = generate_refresh_token(user)
 
-        response = Response()
-        response.set_cookie(key="refreshtoken", value=refresh_token, httponly=True)
-        response.data = {
-            "access_token": access_token,
-            "user": serialized_user,
-        }
-        return response
