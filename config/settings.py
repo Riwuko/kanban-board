@@ -27,7 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
-REFRESH_TOKEN_SECRET = env("REFRESH_TOKEN_SECRET")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG", default=False)
@@ -51,8 +50,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication",
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -61,12 +59,12 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = "user_account.UserAccount"
 
-JWT_AUTH = {
-    "JWT_VERIFY": True,
-    "JWT_VERIFY_EXPIRATION": True,
-    "JWT_EXPIRATION_DELTA": datetime.timedelta(minutes=30),
-    "JWT_REFRESH_EXPIRATION_DELTA": relativedelta(years=1),
-    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": relativedelta(years=1),
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": env("REFRESH_TOKEN_SECRET"),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 MIDDLEWARE = [
