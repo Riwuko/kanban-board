@@ -1,6 +1,7 @@
+import unittest
+
 from django.test import Client, TestCase
 from django.urls import reverse
-import unittest
 
 from user_account.models.user import UserAccount
 
