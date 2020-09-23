@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+import datetime
 import os
 
 import environ
+from dateutil.relativedelta import relativedelta
 
 env = environ.Env()
 
@@ -50,12 +52,22 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
 
+AUTH_USER_MODEL = "user_account.UserAccount"
+
+JWT_AUTH = {
+    "JWT_VERIFY": True,
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_EXPIRATION_DELTA": datetime.timedelta(minutes=30),
+    "JWT_REFRESH_EXPIRATION_DELTA": relativedelta(years=1),
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
