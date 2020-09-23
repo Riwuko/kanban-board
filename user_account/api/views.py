@@ -42,3 +42,11 @@ class UserLoginView(generics.CreateAPIView):
         return Response(user_details, status=status.HTTP_200_OK)
 
 
+class UserDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserAccountSerializer
+    queryset = UserAccount.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.serializer_class(request.user)
+        return Response(serializer.data["email"], status=status.HTTP_200_OK)
