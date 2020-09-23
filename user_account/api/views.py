@@ -27,9 +27,6 @@ class UserLoginView(generics.CreateAPIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
-        if (email is None) or (password is None):
-            raise exceptions.AuthenticationFailed("username and password required")
-
         user = UserAccount.objects.get(email=email)
         if (user is None) or (not user.check_password(password)):
             raise exceptions.AuthenticationFailed("Wrong email or password")
