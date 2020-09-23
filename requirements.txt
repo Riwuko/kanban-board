@@ -5,3 +5,4 @@ djangorestframework>=3.10.0,<3.11.0
 django-environ
 black
 pre-commit
+pyjwt
