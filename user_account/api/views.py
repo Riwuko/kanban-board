@@ -5,11 +5,7 @@ from rest_framework.decorators import api_view
 from user_account.api.serializers import RegistrationSerializer
 
 
-@api_view(
-    [
-        "POST",
-    ]
-)
+@api_view(["POST",])
 def registration_view(request):
     serializer = RegistrationSerializer(data=request.data)
     data = {}
