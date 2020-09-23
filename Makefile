@@ -31,12 +31,8 @@ rebuild:
 
 # Set LOGS=true if you want run dev environment with outputting logs
 run:
-	docker-compose up `if ! [ -n "${LOGS}" ]; then echo "-d"; fi`
+	docker-compose up
 
-
-# Run nosetests if you use run_
-#run_tests:
-#	docker exec web bash -c " "
 
 # Docker stop
 stop:
