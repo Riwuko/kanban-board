@@ -14,7 +14,6 @@ import datetime
 import os
 
 import environ
-from dateutil.relativedelta import relativedelta
 
 env = environ.Env()
 
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
 ]
+AUTH_USER_MODEL = "user_account.UserAccount"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -57,11 +57,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-AUTH_USER_MODEL = "user_account.UserAccount"
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": relativedelta(years=1),
+    "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=365),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": env("REFRESH_TOKEN_SECRET"),
     "AUTH_HEADER_TYPES": ("Bearer",),
