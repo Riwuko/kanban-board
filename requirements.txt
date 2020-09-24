@@ -5,5 +5,3 @@ djangorestframework>=3.10.0,<3.11.0
 djangorestframework_simplejwt
 django-environ
 black
-pre-commit
-python-dateutil
