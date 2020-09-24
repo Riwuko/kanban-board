@@ -21,4 +21,7 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 
     def get(self, request, *args, **kwargs):
         serializer = self.serializer_class(request.user)
-        return Response(serializer.data["email"], status=status.HTTP_200_OK)
+        response = {
+            "email": serializer.data["email"],
+        }
+        return Response(response)
