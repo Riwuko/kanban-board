@@ -15,6 +15,4 @@ class AccountManager(BaseUserManager):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
-        user = self.create_user(email, password, **extra_fields)
-        user.save()
-        return user
+        return self.create_user(email, password, **extra_fields)
