@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from user_account.models.user import UserAccount
+from user_account.models.user_account import UserAccount
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class UserAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAccount
         fields = ["email", "password"]
@@ -11,7 +11,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     def save(self):
         account = UserAccount(
             email=self.validated_data["email"],
-            password = self.validated_data["password"]
         )
+        account.set_password(self.validated_data["password"])
         account.save()
         return account
