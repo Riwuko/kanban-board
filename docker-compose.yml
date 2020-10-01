@@ -4,6 +4,8 @@ services:
   db:
     image: postgres:12
     env_file: .env
+  redis:
+    image: "redis:alpine"
   web:
     build:
       context: .
@@ -17,3 +19,21 @@ services:
       - ./static:/static
     depends_on:
       - db
+  celery:
+    build: .
+    command: celery -A config worker -l INFO
+    env_file: .env
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis
+  celery-beat:
+    build: .
+    command: celery -A config beat -l INFO
+    env_file: .env
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+      - redis

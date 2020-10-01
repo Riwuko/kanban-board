@@ -9,11 +9,12 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
 import datetime
 import os
 
 import environ
+
+from celery.schedules import crontab
 
 env = environ.Env()
 
@@ -62,7 +63,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=1030),
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=365),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": env("REFRESH_TOKEN_SECRET"),
@@ -87,7 +88,10 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "kanban", "templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -209,3 +213,10 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
 
 SOCIAL_AUTH_GITHUB_OAUTH2_KEY = env("SOCIAL_AUTH_GITHUB_OAUTH2_KEY")
 SOCIAL_AUTH_GITHUB_OAUTH2_SECRET = env("SOCIAL_AUTH_GITHUB_OAUTH2_SECRET")
+
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
