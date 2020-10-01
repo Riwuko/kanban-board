@@ -1,36 +1,21 @@
-from django.shortcuts import get_object_or_404
 from kanban.models.issue import Issue
 from kanban.models.project import Project
 from rest_framework import serializers
-from user_account.models.user_account import UserAccount
-
-
-class UserAccountRelatedField(serializers.RelatedField):
-    def display_value(self, instance):
-        return instance
-
-    def to_representation(self, value):
-        return str(value)
-
-    def to_internal_value(self, data):
-        try:
-            user = UserAccount.objects.get(email=data)
-        except UserAccount.DoesNotExist:
-            user = get_object_or_404(UserAccount, id=data)
-        return user
+from user_account.api.serializers import UserAccountSerializer
 
 
 class IssueSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(
         default=serializers.CreateOnlyDefault(serializers.CurrentUserDefault())
     )
-    owner_email = serializers.CharField(source="owner.email")
-    project_name = serializers.CharField(source="project.name")
-    assignee = UserAccountRelatedField(many=True, queryset=UserAccount.objects.all())
+    owner_email = serializers.CharField(source="owner.email", read_only=True)
+    project_name = serializers.CharField(source="project.name", read_only=True)
+    assignee = UserAccountSerializer(read_only=True)
 
     class Meta:
         model = Issue
         fields = [
+            "id",
             "title",
             "description",
             "due_date",
@@ -42,14 +27,25 @@ class IssueSerializer(serializers.ModelSerializer):
             "project_name",
         ]
         extra_kwargs = {
-            "assignee": {"required": False},
             "description": {"required": False},
             "due_date": {"required": False},
             "status": {"required": False},
             "project": {"write_only": True},
-            "owner_email": {"read_only": True},
-            "project_name": {"read_only": True},
+            "id": {"read_only": True},
         }
+
+
+class IssueListSerializer(serializers.ModelSerializer):
+    assignee = UserAccountSerializer(read_only=True)
+
+    class Meta:
+        model = Issue
+        fields = [
+            "title",
+            "due_date",
+            "status",
+            "assignee",
+        ]
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -57,15 +53,19 @@ class ProjectSerializer(serializers.ModelSerializer):
         default=serializers.CreateOnlyDefault(serializers.CurrentUserDefault())
     )
     owner_email = serializers.CharField(source="owner.email", read_only=True)
-    project_issues = serializers.SlugRelatedField(many=True, slug_field="title", read_only=True)
-    users = UserAccountRelatedField(many=True, queryset=UserAccount.objects.all(), required=False)
+    users = UserAccountSerializer(many=True, read_only=True)
+    project_issues = IssueListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project
         fields = [
+            "id",
             "name",
             "owner",
             "owner_email",
             "users",
             "project_issues",
         ]
+        extra_kwargs = {
+            "id": {"read_only": True},
+        }
