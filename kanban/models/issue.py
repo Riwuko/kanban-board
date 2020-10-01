@@ -15,10 +15,10 @@ class Issue(models.Model):
         (DONE, "DONE"),
     ]
 
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=30, unique=True)
     description = models.CharField(max_length=500, null=True)
     creation_date = models.DateTimeField(auto_now_add=True)
-    due_date = models.DateField(null=True)
+    due_date = models.DateTimeField(null=True, blank=True, default=None)
     status = models.CharField(max_length=32, choices=STATUS, default=TODO)
 
     owner = models.ForeignKey(
@@ -27,14 +27,10 @@ class Issue(models.Model):
         on_delete=models.CASCADE,
     )
 
-    assignee = models.ManyToManyField(UserAccount, related_name="issues", blank=True)
+    assignee = models.ForeignKey(
+        UserAccount, related_name="issues", null=True, on_delete=models.SET_NULL
+    )
     project = models.ForeignKey(Project, related_name="project_issues", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.project} : {self.owner} : {self.title}"
-
-    class Meta:
-        unique_together = (
-            "title",
-            "creation_date",
-        )
