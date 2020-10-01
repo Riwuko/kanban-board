@@ -1,6 +1,9 @@
 from kanban.api.serializers import IssueSerializer
 from kanban.models.issue import Issue
-from kanban.tasks import issue_assignee_change_notification, issue_due_time_notification
+from kanban.tasks import (
+    issue_assignee_change_notification,
+    issue_due_time_notification,
+)
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -17,11 +20,15 @@ class IssueViewSet(viewsets.ModelViewSet):
         instance = serializer.save()
 
         if instance.due_date != previous_due_date and instance.assignee is not None:
-            issue_due_time_notification.apply_async([instance.pk], eta=instance.due_date)
+            issue_due_time_notification.apply_async(
+                [instance.pk], eta=instance.due_date
+            )
 
         return instance
 
-    @action(detail=True, methods=["get", "post"], url_path="users", url_name="issue-users")
+    @action(
+        detail=True, methods=["get", "post"], url_path="users", url_name="issue-users"
+    )
     def issue_assignee(self, request, pk=None):
         self.serializer_class = AssignUserSerializer
         if request.method == "GET":
@@ -50,7 +57,10 @@ class IssueViewSet(viewsets.ModelViewSet):
                 issue.assignee = user
                 issue.save()
                 return Response(
-                    {"status": "User assigned to issue.", "assignee": issue.assignee.email}
+                    {
+                        "status": "User assigned to issue.",
+                        "assignee": issue.assignee.email,
+                    }
                 )
             return Response({"status": "User already assigned to issue."})
 

@@ -18,7 +18,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
             Q(owner=self.request.user) | Q(users__pk=self.request.user.pk)
         )
 
-    @action(detail=True, methods=["get", "post"], url_path="users", url_name="project-user")
+    @action(
+        detail=True, methods=["get", "post"], url_path="users", url_name="project-user"
+    )
     def project_users(self, request, pk=None):
         self.serializer_class = AssignUserSerializer
         if request.method == "GET":
@@ -44,7 +46,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         users = project.users.values("email")
         return Response({"Project users": users})
 
-    @action(detail=True, methods=["get", "post"], url_path="issues", url_name="project-issues")
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="issues",
+        url_name="project-issues",
+    )
     def project_issues(self, request, pk=None):
         self.serializer_class = IssueSerializer
         if request.method == "GET":
