@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from user_account.api.serializers import AssignUserSerializer
 from user_account.models.user_account import UserAccount
 from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
 
 
 class IssueViewSet(viewsets.ModelViewSet):
@@ -37,3 +38,27 @@ class IssueAssignee(generics.ListCreateAPIView):
     def get_queryset(self):
         issue_pk = self.kwargs["pk"]
         return self.queryset.filter(issues__pk=issue_pk)
+
+    def post(self, request, *args, **kwargs):
+        issue = get_object_or_404(Issue, id=self.kwargs.get("pk"))
+        user_email = request.data.get("email")
+        user = get_object_or_404(UserAccount, email=user_email)
+        previous_assignee = issue.assignee
+        issue.assignee = user
+
+        try:
+            previous_assignee_email = previous_assignee.email
+        except AttributeError:
+            previous_assignee_email = None
+
+        if issue.assignee != previous_assignee:
+            issue_assignee_change_notification.apply_async(
+                [
+                    issue.title,
+                    issue.assignee.email,
+                    previous_assignee_email,
+                ]
+            )
+
+        issue.save(update_fields=["assignee"])
+        return Response({"email": issue.assignee.email})
