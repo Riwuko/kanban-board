@@ -11,15 +11,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from user_account.api.serializers import AssignUserSerializer
 from user_account.models import UserAccount
-from rest_framework.permissions import AllowAny
 from rest_framework import generics
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.prefetch_related("users")
     serializer_class = ProjectListSerializer
-    permission_classes = [AllowAny]
     detail_serializer_class = ProjectSerializer
 
     def get_serializer_class(self):
@@ -28,11 +27,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         return super(ProjectViewSet, self).get_serializer_class()
 
+    def get_queryset(self):
+        return Project.objects.filter(
+            Q(owner=self.request.user) | Q(users__pk=self.request.user.pk)
+        )
+
 
 class ProjectUsers(generics.ListCreateAPIView):
     queryset = UserAccount.objects.all()
     serializer_class = AssignUserSerializer
-    permission_classes = [AllowAny]
 
     def get_queryset(self):
         project_pk = self.kwargs["pk"]
@@ -43,13 +46,12 @@ class ProjectUsers(generics.ListCreateAPIView):
         user_email = request.data.get("email")
         user = get_object_or_404(UserAccount, email=user_email)
         project.users.add(user)
-        return Response({"users": user.email})
+        return Response({"users": user.email}, status=status.HTTP_200_OK)
 
 
 class ProjectIssues(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [AllowAny]
 
     def get_queryset(self):
         project_pk = self.kwargs["pk"]
@@ -57,14 +59,16 @@ class ProjectIssues(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         project = get_object_or_404(Project, id=self.kwargs.get("pk"))
-        issue, created = Issue.objects.get_or_create(
+        issue, _ = Issue.objects.get_or_create(
             title=request.data.get("title"),
-            description=request.data.get("description"),
-            status=request.data.get("status", Issue.TODO),
-            due_date=request.data.get("due_date"),
-            project=project,
-            owner=self.request.user,
+            defaults={
+                "description": request.data.get("description"),
+                "status": request.data.get("status", Issue.TODO),
+                "due_date": request.data.get("due_date"),
+                "project": project,
+                "owner": self.request.user,
+            },
         )
 
         project.project_issues.add(issue)
-        return Response({"issue": issue.title})
+        return Response({"issue": issue.title}, status=status.HTTP_200_OK)

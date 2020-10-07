@@ -11,6 +11,7 @@ from user_account.api.serializers import AssignUserSerializer
 from user_account.models.user_account import UserAccount
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 
 
 class IssueViewSet(viewsets.ModelViewSet):
@@ -41,8 +42,18 @@ class IssueAssignee(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         issue = get_object_or_404(Issue, id=self.kwargs.get("pk"))
-        user_email = request.data.get("email")
-        user = get_object_or_404(UserAccount, email=user_email)
+        user = get_object_or_404(UserAccount, email=request.data.get("email"))
+
+        if not issue.project.users.filter(pk=user.pk).exists():
+            content = {"response": "User must belong to the project"}
+            return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        self._check_assignee_change(issue, user)
+        issue.save(update_fields=["assignee"])
+        content = {"email": issue.assignee.email}
+        return Response(content, status=status.HTTP_201_CREATED)
+
+    def _check_assignee_change(self, issue, user):
         previous_assignee = issue.assignee
         issue.assignee = user
 
@@ -59,6 +70,3 @@ class IssueAssignee(generics.ListCreateAPIView):
                     previous_assignee_email,
                 ]
             )
-
-        issue.save(update_fields=["assignee"])
-        return Response({"email": issue.assignee.email})
