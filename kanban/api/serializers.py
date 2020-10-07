@@ -89,6 +89,3 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             "users",
             "project_issues",
         ]
-        extra_kwargs = {
-            "id": {"read_only": True},
-        }
