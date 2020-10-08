@@ -56,10 +56,7 @@ class IssueAssignee(generics.ListCreateAPIView):
         previous_assignee = issue.assignee
         issue.assignee = user
 
-        try:
-            previous_assignee_email = previous_assignee.email
-        except AttributeError:
-            previous_assignee_email = None
+        previous_assignee_email = getattr(previous_assignee, "email", None)
 
         if issue.assignee != previous_assignee:
             issue_assignee_change_notification.apply_async(
