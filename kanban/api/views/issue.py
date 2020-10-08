@@ -45,8 +45,7 @@ class IssueAssignee(generics.ListCreateAPIView):
         user = get_object_or_404(UserAccount, email=request.data.get("email"))
 
         if not issue.project.users.filter(pk=user.pk).exists():
-            content = {"response": "User must belong to the project"}
-            return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"response": "User must belong to the project"}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         self._check_assignee_change(issue, user)
         issue.save(update_fields=["assignee"])
