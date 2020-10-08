@@ -3,6 +3,7 @@ from kanban.api.serializers import (
     IssueSerializer,
     ProjectListSerializer,
     ProjectSerializer,
+    AssignIssueSerializer,
 )
 from kanban.models.issue import Issue
 from kanban.models.project import Project
@@ -25,7 +26,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return self.detail_serializer_class
 
-        return super(ProjectViewSet, self).get_serializer_class()
+        return self.serializer_class
 
     def get_queryset(self):
         return Project.objects.filter(
@@ -53,17 +54,18 @@ class ProjectIssues(generics.ListCreateAPIView):
     serializer_class = IssueSerializer
 
     def get_queryset(self):
-        project_pk = self.kwargs["pk"]
-        return self.queryset.filter(project__pk=project_pk)
+        return self.queryset.filter(project__pk=self.kwargs["pk"])
 
     def post(self, request, *args, **kwargs):
+        serializer = AssignIssueSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         project = get_object_or_404(Project, id=self.kwargs.get("pk"))
         issue, _ = Issue.objects.get_or_create(
-            title=request.data.get("title"),
+            title=serializer.data.get("title"),
             defaults={
-                "description": request.data.get("description"),
-                "status": request.data.get("status", Issue.TODO),
-                "due_date": request.data.get("due_date"),
+                "description": serializer.data.get("description"),
+                "status": serializer.data.get("status", Issue.TODO),
+                "due_date": serializer.data.get("due_date"),
                 "project": project,
                 "owner": self.request.user,
             },
