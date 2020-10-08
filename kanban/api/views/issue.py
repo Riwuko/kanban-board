@@ -9,7 +9,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from user_account.api.serializers import AssignUserSerializer
 from user_account.models.user_account import UserAccount
-from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 
@@ -17,7 +16,6 @@ from rest_framework import status
 class IssueViewSet(viewsets.ModelViewSet):
     queryset = Issue.objects.select_related("assignee", "project")
     serializer_class = IssueSerializer
-    permission_classes = [AllowAny]
 
     def perform_update(self, serializer):
         previous_due_date = serializer.instance.due_date
@@ -34,18 +32,19 @@ class IssueViewSet(viewsets.ModelViewSet):
 class IssueAssignee(generics.ListCreateAPIView):
     queryset = UserAccount.objects.all()
     serializer_class = AssignUserSerializer
-    permission_classes = [AllowAny]
 
     def get_queryset(self):
-        issue_pk = self.kwargs["pk"]
-        return self.queryset.filter(issues__pk=issue_pk)
+        return self.queryset.filter(issues__pk=self.kwargs["pk"])
 
     def post(self, request, *args, **kwargs):
         issue = get_object_or_404(Issue, id=self.kwargs.get("pk"))
         user = get_object_or_404(UserAccount, email=request.data.get("email"))
 
         if not issue.project.users.filter(pk=user.pk).exists():
-            return Response({"response": "User must belong to the project"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(
+                {"response": "User must belong to the project"},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
         self._check_assignee_change(issue, user)
         issue.save(update_fields=["assignee"])
