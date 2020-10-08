@@ -9,26 +9,22 @@ from kanban.models.issue import Issue
 
 @app.task()
 def issue_due_time_notification(issue_pk):
-
     try:
-        issue = Issue.objects.get(pk=issue_pk)
+        issue = Issue.objects.get(pk=issue_pk, status=Issue.DONE)
     except Issue.DoesNotExist:
-        return
-    else:
-        if issue.status != Issue.DONE:
-            subject = "Task finished with status not done!"
-            html_message = render_to_string(
-                "email_templates/issue_due_time_notification.html", {"context": issue}
-            )
-            plain_message = strip_tags(html_message)
-            send_mail(
-                subject,
-                plain_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [issue.assignee.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
+        subject = "Task finished with status not done!"
+        html_message = render_to_string(
+            "email_templates/issue_due_time_notification.html", {"context": issue}
+        )
+        plain_message = strip_tags(html_message)
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [issue.assignee.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
 
 
 @app.task()
