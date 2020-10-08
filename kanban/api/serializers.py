@@ -89,3 +89,21 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
             "users",
             "project_issues",
         ]
+
+
+class AssignIssueSerializer(serializers.ModelSerializer):
+
+    title = serializers.CharField(required=True)
+    description = serializers.CharField(required=False)
+    due_date = serializers.DateTimeField(required=False)
+    status = serializers.ChoiceField(Issue.STATUS, default=Issue.TODO)
+
+    class Meta:
+        model = Issue
+        fields = [
+            "id",
+            "title",
+            "description",
+            "due_date",
+            "status",
+        ]
