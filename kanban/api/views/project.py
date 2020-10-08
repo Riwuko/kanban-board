@@ -38,8 +38,7 @@ class ProjectUsers(generics.ListCreateAPIView):
     serializer_class = AssignUserSerializer
 
     def get_queryset(self):
-        project_pk = self.kwargs["pk"]
-        return self.queryset.filter(projects__pk=project_pk)
+        return self.queryset.filter(projects__pk=self.kwargs["pk"])
 
     def post(self, request, *args, **kwargs):
         project = get_object_or_404(Project, id=self.kwargs.get("pk"))
