@@ -9,9 +9,8 @@ from kanban.models.issue import Issue
 
 @app.task()
 def issue_due_time_notification(issue_pk):
-    try:
-        issue = Issue.objects.get(pk=issue_pk, status=Issue.DONE)
-    except Issue.DoesNotExist:
+    issue = Issue.objects.filter(pk=issue_pk).exclude(status=Issue.DONE).first()
+    if issue:
         subject = "Task finished with status not done!"
         html_message = render_to_string(
             "email_templates/issue_due_time_notification.html", {"context": issue}
