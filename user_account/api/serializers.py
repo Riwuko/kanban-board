@@ -17,9 +17,3 @@ class UserAccountSerializer(serializers.ModelSerializer):
         account.set_password(self.validated_data["password"])
         account.save()
         return account
-
-
-class AssignUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserAccount
-        fields = ["email"]
