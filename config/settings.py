@@ -14,8 +14,6 @@ import os
 
 import environ
 
-from celery.schedules import crontab
-
 env = environ.Env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
