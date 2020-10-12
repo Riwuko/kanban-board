@@ -34,7 +34,6 @@ class IssueSerializer(serializers.ModelSerializer):
             "description": {"required": False},
             "due_date": {"required": False},
             "status": {"required": False},
-            "id": {"read_only": True},
         }
 
 
@@ -53,10 +52,6 @@ class IssueListSerializer(serializers.ModelSerializer):
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
-    owner = serializers.HiddenField(
-        default=serializers.CreateOnlyDefault(serializers.CurrentUserDefault())
-    )
-
     class Meta:
         model = Project
         fields = [
@@ -64,9 +59,6 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "name",
             "owner",
         ]
-        extra_kwargs = {
-            "id": {"read_only": True},
-        }
 
 
 class ProjectSerializer(serializers.ModelSerializer):
