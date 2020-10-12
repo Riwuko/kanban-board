@@ -8,8 +8,12 @@ from kanban.models.issue import Issue
 
 
 @app.task()
-def issue_due_time_notification(issue_pk):
-    issue = Issue.objects.filter(pk=issue_pk).exclude(status=Issue.DONE).first()
+def issue_due_time_notification(issue_pk, issue_due_date):
+    issue = (
+        Issue.objects.filter(pk=issue_pk, due_date=issue_due_date)
+        .exclude(status=Issue.DONE)
+        .first()
+    )
     if issue:
         subject = "Task finished with status not done!"
         html_message = render_to_string(

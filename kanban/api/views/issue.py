@@ -19,7 +19,7 @@ class IssueViewSet(viewsets.ModelViewSet):
     def _update_due_date(self, instance, previous_due_date):
         if instance.due_date != previous_due_date and instance.assignee is not None:
             issue_due_time_notification.apply_async(
-                [instance.pk], eta=instance.due_date
+                [instance.pk, instance.due_date], eta=instance.due_date
             )
 
     def perform_update(self, serializer):
