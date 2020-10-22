@@ -26,3 +26,15 @@ services:
     depends_on:
       - db
       - redis
+
+  react:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+    stdin_open: true
+    command: npm start
+    env_file: .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/frontend

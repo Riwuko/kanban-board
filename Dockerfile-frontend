@@ -1,0 +1,7 @@
+FROM node:14.4.0-slim
+WORKDIR /frontend
+ADD frontend/package.json /frontend
+RUN npm install
+COPY frontend/ /frontend
+EXPOSE 3000
+CMD ["npm", "start"]
