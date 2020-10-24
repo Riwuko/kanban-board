@@ -1,0 +1,13 @@
+:root {
+    --main-bg-color: rgb(180, 41, 125);
+}
+
+body {
+    font-family: sans-serif;
+    background-color: var(--main-bg-color);
+    margin: 0;
+}
+
+*, *::after, *::before {
+  box-sizing: border-box;
+}
